@@ -10,7 +10,7 @@ import ru.x37.tanalytics.entities.EventType;
 
 public interface EventRepository extends PagingAndSortingRepository<Event, Long>, JpaSpecificationExecutor<Event> {
     static Specification<Event> havingEventType(EventType eventType) {
-        return (config, cq, cb) -> cb.equal(config.get("eventType"), eventType);
+        return (config, cq, cb) -> eventType != null ? cb.equal(config.get("eventType"), eventType) : cb.isNotNull(config.get("eventType"));
     }
 
     static Specification<Event> after(long timestamp) {
@@ -25,11 +25,10 @@ public interface EventRepository extends PagingAndSortingRepository<Event, Long>
         return findAll(havingEventType(type), pageable);
     }
 
-    default Page<Event> findByTimestamps(long from, long to, Pageable pageable) {
-        return findAll(after(from).and(before(to)), pageable);
-    }
-
-    default Page<Event> findByEventTypeAndTimestamps(EventType type, long from, long to, Pageable pageable) {
-        return findAll(havingEventType(type).and(after(from).and(before(to))), pageable);
+    default Page<Event> findBy(EventType type, Long from, Long to, Pageable pageable) {
+        Specification<Event> resultSpec = havingEventType(type);
+        if (from != null) resultSpec = resultSpec.and(after(from));
+        if (to != null) resultSpec = resultSpec.and(before(to));
+        return findAll(resultSpec, pageable);
     }
 }

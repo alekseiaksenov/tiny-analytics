@@ -35,32 +35,26 @@ public class JpaEventService implements EventService {
     @Transactional
     public Page<Event> getEvents(String eventType, Pageable pageable) {
         Optional<EventType> type = eventTypeRepository.findById(eventType);
-        return eventRepository.findByEventType(type.get(), pageable);
+        return eventRepository.findByEventType(type.orElse(null), pageable);
     }
 
     @Override
-    public Page<Event> getEvents(long from, long to, Pageable pageable) {
-        return eventRepository.findByTimestamps(from, to, pageable);
-    }
-
-    @Transactional
-    public Page<Event> getEvents(String eventType, long from, long to, Pageable pageable) {
-        Optional<EventType> type = eventTypeRepository.findById(eventType);
-        return eventRepository.findByEventTypeAndTimestamps(type.get(), from, to, pageable);
+    public Page<Event> getEvents(Long from, Long to, Pageable pageable) {
+        return eventRepository.findBy(null, from, to, pageable);
     }
 
     @Override
     @Transactional
     public Page<Event> getEvents(String eventType, Long from, Long to, Pageable pageable) {
-        if (eventType == null && from == null && to == null) return getEvents(pageable);
-        if (eventType != null && from == null && to == null) return getEvents(eventType, pageable);
-        return getEvents(eventType, from == null ? 0L : from, to == null ? System.currentTimeMillis() : to, pageable);
+        Optional<EventType> type = eventTypeRepository.findById(eventType);
+        return eventRepository.findBy(type.orElse(null), from, to, pageable);
     }
 
     @Override
     @Transactional
     public void persistEvent(Event event) {
-        Optional<EventType> eventType = eventTypeRepository.findById(event.getEventType().getName());
-        eventRepository.save(event.setEventType(eventType.get()));
+        Optional<EventType> type = eventTypeRepository.findById(event.getEventType().getName());
+        eventRepository.save(event.setEventType(type.orElseThrow(()
+                -> new IllegalArgumentException("No such event type"))));
     }
 }

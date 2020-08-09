@@ -11,7 +11,7 @@ public interface EventService {
     List<EventType> getEventTypes();
     Page<Event> getEvents(Pageable pageable);
     Page<Event> getEvents(String eventType, Pageable pageable);
-    Page<Event> getEvents(long from, long to, Pageable pageable);
+    Page<Event> getEvents(Long from, Long to, Pageable pageable);
     Page<Event> getEvents(String eventType, Long from, Long to, Pageable pageable);
 
     void persistEvent(Event event);
