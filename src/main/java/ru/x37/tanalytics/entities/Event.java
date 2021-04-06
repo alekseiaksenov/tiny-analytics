@@ -1,6 +1,9 @@
 package ru.x37.tanalytics.entities;
 
 import javax.persistence.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 @Entity
 @Table(name = "events")
@@ -79,5 +82,11 @@ public class Event {
                 ", additional='" + additional + '\'' +
                 ", timestamp=" + timestamp +
                 '}';
+    }
+
+    public String toLogString() {
+        DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
+        formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return String.format("[%s] %s – %s (%s)", eventType.getName(), formatter.format(timestamp), description, additional);
     }
 }
